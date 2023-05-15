@@ -1,25 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
+import Home from './pages/Home';
+import { Routes, Route } from 'react-router-dom';
+import Navbar from './components/navbar';
+import Footer from './components/footer';
 
-function App() {
+// IMPORT FONTS
+import '@fontsource/inter/300.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/700.css';
+
+import React from 'react';
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Navbar />
+      <Routes>
+        <Route element={<Home />} path="/" />
+      </Routes>
+      <Footer />
+    </>
   );
-}
+};
 
 export default App;
