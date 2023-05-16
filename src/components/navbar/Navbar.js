@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Navbar.css';
+import { useNavigate } from 'react-router-dom';
 import {
   Toolbar,
   Container,
@@ -15,7 +16,7 @@ import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDown
 
 /**
  *
- * @returns NAVBAR COMPONENT CLASSES
+ * @description NAVBAR COMPONENT CLASSES
  */
 
 const navbar = {
@@ -132,7 +133,7 @@ const navbar = {
 
 /**
  *
- * @returns PAGE NAVIGATION
+ * @description PAGE NAVIGATION
  */
 
 const pages = [
@@ -147,12 +148,14 @@ const pages = [
 ];
 
 const Navbar = () => {
+  // NAVIGATION
+  const navigate = useNavigate();
   return (
     <>
       <Container maxWidth={false} sx={navbar.container}>
         <AppBar position="static" color='default' sx={navbar.appBar}>
           <Toolbar disableGutters sx={navbar.toolbarLeft}>
-            <Typography variant="h6" sx={navbar.logo}>
+            <Typography variant="a" onClick={() => navigate('/')} sx={navbar.logo}>
               Readr
             </Typography>
             <Box sx={navbar.box}>
@@ -164,7 +167,7 @@ const Navbar = () => {
                     key={index}
                     sx={navbar.menuButton}
                     endIcon={
-                      page.title == 'Categories' ? (
+                      page.title === 'Categories' ? (
                         <KeyboardArrowDownOutlinedIcon sx={navbar.icons} />
                       ) : null
                     }
@@ -183,7 +186,7 @@ const Navbar = () => {
               Upload
             </Button>
             <Box>
-              <IconButton>
+              <IconButton onClick={() => navigate('/auth')}>
                 <Avatar
                   sx={{ width: 25, height: 25 }}
                   src="https://res.cloudinary.com/nishimweprince/image/upload/v1683983573/bookstore/users/default_zqfkfp.png"

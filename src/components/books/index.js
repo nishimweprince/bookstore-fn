@@ -1,1 +1,2 @@
-export { default } from './BooksContainer';
+export { BooksContainer } from './BooksContainer';
+export { SingleBook } from './SingleBook';

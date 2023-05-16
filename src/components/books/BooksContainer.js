@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import env from '../../constants';
+import Image from 'mui-image';
 
 /**
  * @return BOOKS CONTAINER COMPONENT CLASSES
@@ -55,11 +56,10 @@ const booksContainer = {
     height: '100%',
   },
   booksCardImage: {
-    height: '20rem',
-    maxWidth: '100%',
-    objectFit: 'cover',
     margin: '0 auto',
     boxShadow: '0 0 10px 0 rgba(0,0,0,0.2)',
+    height: '100%',
+    width: '100%',
   },
 };
 
@@ -113,14 +113,10 @@ const BooksContainer = () => {
           {books.map((book, index) => {
             return (
               <Typography variant='a' sx={booksContainer.booksCard} target="_blank" onClick={() => {
-                const bookObj = {
-                  id: book.id,
-                  slug: book.slug,
-                }
                 localStorage.setItem('bookId', book.id)
                 navigate(`/book/${book.slug}`)
               }} key={book.id}>
-                <img
+                <Image
                   style={booksContainer.booksCardImage}
                   src={book.cover}
                   alt={book.title}
