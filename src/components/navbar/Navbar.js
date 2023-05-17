@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Navbar.css';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+import { cookies } from '../../constants';
 
 /**
  *
@@ -148,6 +149,31 @@ const pages = [
 ];
 
 const Navbar = () => {
+
+  // DEFINE STATES
+  const [loggedIn, setLoggedIn] = useState(false);
+
+    // GET USER AVATAR
+    let avatar = "https://res.cloudinary.com/nishimweprince/image/upload/v1683983573/bookstore/users/default_zqfkfp.png",
+    userCookie;
+
+  const getCookie = () => {
+    // CHECK IF USER IS LOGGED IN
+    userCookie = cookies.get('user');
+    if (userCookie) {
+      setLoggedIn(!loggedIn);
+    }
+  };
+
+  useEffect(() => {
+    getCookie();
+  }, []);
+
+  if(loggedIn) {
+    const user = JSON.parse(localStorage.getItem('user'));
+    avatar = user.photo;
+  }
+
   // NAVIGATION
   const navigate = useNavigate();
   return (
@@ -189,7 +215,7 @@ const Navbar = () => {
               <IconButton onClick={() => navigate('/auth')}>
                 <Avatar
                   sx={{ width: 25, height: 25 }}
-                  src="https://res.cloudinary.com/nishimweprince/image/upload/v1683983573/bookstore/users/default_zqfkfp.png"
+                  src={loggedIn ? avatar : null}
                 ></Avatar>
               </IconButton>
             </Box>

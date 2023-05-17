@@ -2,7 +2,7 @@ import { Box, Container, Typography } from '@mui/material';
 import React, { useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import env from '../../constants';
+import { env } from '../../constants';
 import Image from 'mui-image';
 
 /**

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import env from '../../constants';
+import { env } from '../../constants';
 
 const SingleBook = () => {
   // FETCH BOOK ID FROM LOCAL STORAGE
