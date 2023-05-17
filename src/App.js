@@ -9,7 +9,7 @@ import '@fontsource/inter/500.css';
 import '@fontsource/inter/700.css';
 import SingleBook from './components/books/SingleBook';
 import Auth from './pages/Auth';
-
+import Register from './components/authentication/Register';
 
 /**
  *
@@ -19,7 +19,25 @@ import Auth from './pages/Auth';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#19575a',
+      main: '#1E7A84',
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontSize: '1.6rem',
+        },
+      },
+    },
+   Typography: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontSize: '1.6rem',
+        },
+      },
     },
   },
 });
@@ -29,12 +47,13 @@ const App = () => {
     <>
       <ThemeProvider theme={theme}>
         <Container maxWidth={false}>
-        <Navbar />
-        <Routes>
-          <Route element={<Home />} path="/" />
-          <Route path='/book/:slug' element={<SingleBook />} />
-          <Route path='/auth' element={<Auth />} />
-        </Routes>
+          <Navbar />
+          <Routes>
+            <Route element={<Home />} path="/" />
+            <Route path="/book/:slug" element={<SingleBook />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/register" element={<Register />} />
+          </Routes>
         </Container>
       </ThemeProvider>
     </>

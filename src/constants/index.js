@@ -1,8 +1,4 @@
-import { apiUrl, port } from "./envVariables"
+import env from './environmentVariables';
+import cookies from './cookies';
 
-const env = {
-    apiUrl,
-    port
-}
-
-export default env;
+export { env, cookies };
