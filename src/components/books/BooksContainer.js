@@ -58,7 +58,7 @@ const booksContainer = {
   booksCardImage: {
     margin: '0 auto',
     boxShadow: '0 0 10px 0 rgba(0,0,0,0.2)',
-    height: '100%',
+    maxHeight: '100%',
     width: '100%',
   },
 };

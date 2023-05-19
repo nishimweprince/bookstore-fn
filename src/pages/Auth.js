@@ -1,18 +1,68 @@
 import { Box, Button, Container, Typography } from '@mui/material';
 import Login from '../components/authentication/Login';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Register from '../components/authentication/Register';
+import { cookies, env } from '../constants';
+import axios from 'axios';
+import LoggedIn from '../components/authentication/LoggedIn';
 
 const Auth = () => {
-  // TOGGLE LOGIN AND REGISTER FORMS
+  // DEFINE STATES
   const [loginForm, setLoginForm] = useState(false);
   const [registrationForm, setRegistrationForm] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userCookie, setuserCookie] = useState(null);
+
+  console.log(userCookie);
+
+  // SET USER DETAILS STATE
+  const [userDetails, setUserDetails] = useState({});
+
+  // FETCH USER DETAILS
+  const fetchUserDetails = async () => {
+    try {
+      const response = await axios.get(
+        `${env.apiUrl}:${env.port}/api/users/${userCookie.id}`,
+        {
+          headers: {
+            Authorization: `Authorization=${userCookie.token}`,
+          },
+        }
+      );
+      setUserDetails(response.data.user);
+      console.log(userDetails);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // HANDLE LOGIN FORM
   const toggleForms = () => {
     setLoginForm(!loginForm);
     setRegistrationForm(!registrationForm);
   };
+
+  const getUserCookie = async () => {
+    const userCookie = await cookies.get('user');
+    if (userCookie) {
+      setLoggedIn(true);
+      setRegistrationForm(false);
+      setLoginForm(false);
+      setuserCookie(userCookie);
+    }
+  };
+
+  useEffect(() => {
+    getUserCookie();
+  }, []);
+
+  useEffect(() => {
+    if (userCookie) {
+      fetchUserDetails();
+    }
+  }, [userCookie]);
+
+  console.log(loggedIn);
 
   return (
     <>
@@ -31,6 +81,7 @@ const Auth = () => {
       >
         <Login loginForm={loginForm} />
         <Register registrationForm={registrationForm} />
+        <LoggedIn LoggedIn={loggedIn} />
         <hr
           style={{
             width: '90%',
@@ -41,13 +92,17 @@ const Auth = () => {
           }}
         ></hr>
         <Box
-          sx={ loginForm ? {
-            display: 'flex',
-            alignItems: 'center',
-            margin: '0 auto',
-          } : {
-            display: 'none',
-          }}
+          sx={
+            loginForm
+              ? {
+                  display: 'flex',
+                  alignItems: 'center',
+                  margin: '0 auto',
+                }
+              : {
+                  display: 'none',
+                }
+          }
         >
           <Typography
             variant="p"
@@ -77,13 +132,17 @@ const Auth = () => {
           </Button>
         </Box>
         <Box
-          sx={ registrationForm ? {
-            display: 'flex',
-            alignItems: 'center',
-            margin: '0 auto',
-          } : {
-            display: 'none',
-          }}
+          sx={
+            registrationForm
+              ? {
+                  display: 'flex',
+                  alignItems: 'center',
+                  margin: '0 auto',
+                }
+              : {
+                  display: 'none',
+                }
+          }
         >
           <Typography
             variant="p"

@@ -104,13 +104,14 @@ const Login = ({ loginForm }) => {
         console.log(data);
         cookies.set('user', {
           id: data.user.id,
-          token: data.token,
+          token: data.Authorization,
         }, { path: '/', maxAge: 604800 });
         localStorage.setItem('user', JSON.stringify(data.user));
         setTimeout(() => {
         navigate('/');
         }, 2000);
         setLoading(false);
+        console.log(data);
       })
       .catch((err) => {
         console.log(err);

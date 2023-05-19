@@ -167,7 +167,7 @@ const Navbar = () => {
 
   useEffect(() => {
     getCookie();
-  }, []);
+  }, [userCookie]);
 
   if(loggedIn) {
     const user = JSON.parse(localStorage.getItem('user'));
