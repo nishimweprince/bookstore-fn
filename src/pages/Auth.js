@@ -5,6 +5,7 @@ import Register from '../components/authentication/Register';
 import { cookies, env } from '../constants';
 import axios from 'axios';
 import LoggedIn from '../components/authentication/LoggedIn';
+import { useCookies } from 'react-cookie';
 
 const Auth = () => {
   // DEFINE STATES
@@ -12,8 +13,7 @@ const Auth = () => {
   const [registrationForm, setRegistrationForm] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [userCookie, setuserCookie] = useState(null);
-
-  console.log(userCookie);
+  const [cookie, setCookie, removeCookie] = useCookies(['user']);
 
   // SET USER DETAILS STATE
   const [userDetails, setUserDetails] = useState({});
@@ -22,7 +22,7 @@ const Auth = () => {
   const fetchUserDetails = async () => {
     try {
       const response = await axios.get(
-        `${env.apiUrl}:${env.port}/api/users/${userCookie.id}`,
+        `${env.apiUrl}/users/${userCookie.id}`,
         {
           headers: {
             Authorization: `Authorization=${userCookie.token}`,
@@ -30,9 +30,7 @@ const Auth = () => {
         }
       );
       setUserDetails(response.data.user);
-      console.log(userDetails);
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -43,8 +41,7 @@ const Auth = () => {
   };
 
   const getUserCookie = async () => {
-    const userCookie = await cookies.get('user');
-    if (userCookie) {
+    if (cookie.user) {
       setLoggedIn(true);
       setRegistrationForm(false);
       setLoginForm(false);
@@ -61,8 +58,6 @@ const Auth = () => {
       fetchUserDetails();
     }
   }, [userCookie]);
-
-  console.log(loggedIn);
 
   return (
     <>

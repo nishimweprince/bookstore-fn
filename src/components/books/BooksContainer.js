@@ -1,5 +1,5 @@
 import { Box, Container, Typography } from '@mui/material';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { env } from '../../constants';
@@ -18,7 +18,7 @@ const booksContainer = {
     padding: '1rem',
     flexWrap: 'wrap',
     margin: '0 auto 3rem auto',
-    height: 'auto',
+    height: 'fit-content',
   },
   containerHeading: {
     fontSize: '3rem',
@@ -33,7 +33,7 @@ const booksContainer = {
   },
   booksCard: {
     height: 'auto',
-    width: '15rem',
+    width: '20rem',
     padding: '2rem',
     display: 'grid',
     gridTemplateRows: '70% 25%',
@@ -52,6 +52,7 @@ const booksContainer = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-evenly',
+    gap: '1rem',
     color: 'primary',
     height: '100%',
   },
@@ -60,11 +61,11 @@ const booksContainer = {
     boxShadow: '0 0 10px 0 rgba(0,0,0,0.2)',
     maxHeight: '100%',
     width: '100%',
+    objectFit: 'contain',
   },
 };
 
 const BooksContainer = () => {
-
   // REACT NAVIGATE
   const navigate = useNavigate();
 
@@ -72,17 +73,16 @@ const BooksContainer = () => {
    *
    * @returns BOOKS CONTAINER COMPONENT
    */
-  const [books, setBooks] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // GET BOOKS
   const getBooks = async () => {
     try {
-      const { data } = await axios.get(`${env.apiUrl}:${env.port}/api/books`);
+      const { data } = await axios.get(`${env.apiUrl}/books`);
       setBooks(data.books);
       setLoading(false);
     } catch (error) {
-      console.log(error);
       setLoading(false);
     }
   };
@@ -94,7 +94,9 @@ const BooksContainer = () => {
 
   // HANDLE ASYNC LOADING
   if (loading) {
-    return <p>Loading...</p>;
+    return <div className='min-h-[80vh] flex items-center justify-center'>
+      <h1 className='text-[3rem] font-bold'>Loading...</h1>
+    </div>;
   }
 
   return (
@@ -112,10 +114,16 @@ const BooksContainer = () => {
         <Box sx={booksContainer.booksBox}>
           {books.map((book, index) => {
             return (
-              <Typography variant='a' sx={booksContainer.booksCard} target="_blank" onClick={() => {
-                localStorage.setItem('bookId', book.id)
-                navigate(`/book/${book.slug}`)
-              }} key={book.id}>
+              <Typography
+                variant="a"
+                sx={booksContainer.booksCard}
+                target="_blank"
+                onClick={() => {
+                  localStorage.setItem('bookId', book.id);
+                  navigate(`/book/${book.slug}`);
+                }}
+                key={book.id}
+              >
                 <Image
                   style={booksContainer.booksCardImage}
                   src={book.cover}
@@ -136,8 +144,10 @@ const BooksContainer = () => {
                     variant="p"
                     sx={{
                       fontSize: '1.5rem',
-                      maxWidth: '80%',
+                      maxWidth: '100%',
+                      height: '100%',
                       marginBottom: '.5rem',
+                      textOverflow: 'ellipsis',
                     }}
                   >
                     {book.title}

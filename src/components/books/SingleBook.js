@@ -11,9 +11,10 @@ import {
   Typography,
 } from '@mui/material';
 import Image from 'mui-image';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import { useAddToFavoritesMutation, useDeleteBookMutation, useLazyCheckIsFavoriteQuery, useLazyGetSingleBookQuery, useRemoveFromFavoritesMutation } from '../../states/apiSlice';
 
 const SingleBook = () => {
   // FETCH BOOK ID FROM LOCAL STORAGE
@@ -21,11 +22,8 @@ const SingleBook = () => {
 
   // INITIALIZE STATES
   const [bookDetails, setBookDetails] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // CATCH USER COOKIE
-  const userCookie = cookies.get('user');
 
   /**
    * SINGLE BOOK COMPONENT CLASSES
@@ -94,7 +92,8 @@ const SingleBook = () => {
     bookSynopsisList: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '.01rem',
+      gap: '.05rem',
+      padding: '1rem'
     },
     bookSynopsisListItem: {
       display: 'flex',
@@ -107,96 +106,69 @@ const SingleBook = () => {
       textDecoration: 'none',
     },
   };
-  const getBookDetails = async () => {
-    /**
-     * @description - FETCH BOOK DETAILS FROM API
-     */
 
-    try {
-      const response = await axios.get(
-        `${env.apiUrl}:${env.port}/api/books/${bookId}`
-      );
-      const { data } = response;
-      setBookDetails(data.book);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const navigate = useNavigate();
+
+  const [
+    getSingleBook,
+    { data: bookData, isLoading: bookLoading, isSuccess: bookSuccess, isError: bookError },
+  ] = useLazyGetSingleBookQuery();
+
+  const [
+    checkIsFavorite,
+    {data: bookChecked, isLoading: checkLoading, isSuccess: checkSuccess, isError: checkError }
+  ] = useLazyCheckIsFavoriteQuery();
+
+  const [
+    deleteBook,
+    {
+      isLoading: deleteLoading,
+      isSuccess: deleteSuccess,
+      isError: deleteError,
+    },
+  ] = useDeleteBookMutation();
 
   useEffect(() => {
-    getBookDetails();
-  }, []);
+    getSingleBook({ bookId })
+    checkIsFavorite({ bookId })
+  }, [])
 
-  const { author, genre, user } = bookDetails;
+  useEffect(() => {
+    if (bookSuccess) setBookDetails(bookData?.book)
+    if (checkSuccess){
+    if (bookChecked.status) setIsFavorite(true)
+    if(!bookChecked.status) setIsFavorite(false)
+    }
+  }, [bookSuccess, bookError, checkSuccess, checkError, bookData, bookChecked])
 
-  /**
-   * @description HANDLE FAVORITE BOOK
-   */
 
   // ADD BOOK TO FAVORITES
-  const addBookToFavorites = async () => {
-    try {
-      const response = await axios.post(
-        `${env.apiUrl}:${env.port}/api/users/favorites/${bookDetails.id}`,
-        null,
-        {
-          headers: {
-            authorization: `Authorization=${userCookie.token}`,
-          },
-        }
-      );
-      console.log(response.data);
-      setIsFavorite(true);
-    } catch (error) {
-      console.log(error);
-      setIsFavorite(false);
-    }
-  };
+  const [
+    addToFavorites,
+    { isLoading: isAdding, isSuccess: isAdded, isError: isAddError, error: isAddErrorMessage },
+  ] = useAddToFavoritesMutation();
 
   // REMOVE BOOK FROM FAVORITES
-  const removeBookFromFavorites = async () => {
-    try {
-      const response = await axios.delete(
-        `${env.apiUrl}:${env.port}/api/users/favorites/${bookDetails.id}`,
-        {
-          headers: {
-            authorization: `Authorization=${userCookie.token}`,
-          },
-        }
-      );
-      setIsFavorite(false);
-    } catch (error) {
-      console.log(error);
-      setIsFavorite(true);
-    }
-  };
+  const [
+    removeFromFavorites,
+    { isLoading: isRemoving, isSuccess: isRemoved, isError: isRemoveError },
+  ] = useRemoveFromFavoritesMutation();
 
-  // CHECK IF BOOK IS IN FAVORITES
-  const checkIfBookIsInFavorites = async () => {
-    try {
-      const response = await axios.get(
-        `${env.apiUrl}:${env.port}/api/users/favorites/${bookId}`,
-        {
-          headers: {
-            authorization: `Authorization=${userCookie.token}`,
-          },
-        }
-      );
-      const { data } = response;
-      if (!data.status) {
-        setIsFavorite(false);
-      } else {
-        setIsFavorite(true);
-      }
-    } catch (error) {
-      console.log(error);
-      setIsFavorite(false);
-    }
-  };
+
 
   useEffect(() => {
-    checkIfBookIsInFavorites();
-  }, []);
+    if (isAdded) setIsFavorite(true)
+    if (isRemoved) setIsFavorite(false)
+    if (deleteSuccess) navigate('/')
+  }, [isAdded, isAddError, isRemoveError, isRemoved, deleteSuccess, deleteError])
+
+  if (bookLoading) {
+    return (
+      <div className='min-h-[80vh] flex items-center justify-center'>
+        <h1 className='text-[3rem] text-center font-bold'>Loading...</h1>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -220,7 +192,7 @@ const SingleBook = () => {
                 color: 'black',
               }}
             >
-              {genre && genre.name}
+              {bookDetails.genre && bookDetails.genre.name}
             </Typography>
           </Box>
           {/* BOOK DETAILS (TITLE AND AUTHOR) */}
@@ -242,7 +214,7 @@ const SingleBook = () => {
                 margin: '.1rem 0',
               }}
             >
-              By {author && author.name}
+              By {bookDetails.author && bookDetails.author.name}
             </Typography>
           </Box>
           {/* BORROW BOOK */}
@@ -273,10 +245,10 @@ const SingleBook = () => {
             <Typography sx={singleBook.bookSynopsisListItem}>
               Added by
               <Link
-                to={`/users/${user && user.slug}`}
+                to={`/users/${bookDetails.user && bookDetails.user.slug}`}
                 style={singleBook.linkButton}
               >
-                {user && user.name}
+                {bookDetails.user && bookDetails.user.name}
               </Link>
             </Typography>
           </Box>
@@ -314,15 +286,17 @@ const SingleBook = () => {
                 <ListItem sx={singleBook.bookSynopsisListItem}>
                   Author:
                   <Link
-                    to={`/authors/${author && author.slug}`}
+                    to={`/authors/${
+                      bookDetails.author && bookDetails.author.slug
+                    }`}
                     style={singleBook.linkButton}
                   >
                     {' '}
-                    {author && author.name}
+                    {bookDetails.author && bookDetails.author.name}
                   </Link>
                 </ListItem>
                 <ListItem sx={singleBook.bookSynopsisListItem}>
-                  Genre: {genre && genre.name}
+                  Genre: {bookDetails.genre && bookDetails.genre.name}
                 </ListItem>
                 <ListItem sx={singleBook.bookSynopsisListItem}>
                   Copies Available: {bookDetails.copies}
@@ -358,14 +332,26 @@ const SingleBook = () => {
                 fontSize: '1.5rem',
               }}
               startIcon={isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-              onClick={
-                isFavorite ? removeBookFromFavorites : addBookToFavorites
-              }
+              onClick={() => {
+                if (isFavorite) {
+                  removeFromFavorites({ bookId });
+                } else if (isFavorite === false) {
+                  addToFavorites({ bookId });
+                }
+              }}
             >
-              Add to favorites
+              {isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             </Button>
           </Box>
         </Container>
+        <section className="book_crud_container w-[90%] mx-auto my-12 p-8 flex items-center justify-center">
+          <button onClick={() => {
+            deleteBook({ bookId })
+          }}
+          className="py-4 px-8 rounded-lg bg-red-600 text-[1.5rem] text-white ease-in-out duration-300 hover:scale-95">
+            {deleteLoading ? 'Deleting...' : 'Delete Book'}
+          </button>
+        </section>
       </Container>
     </>
   );

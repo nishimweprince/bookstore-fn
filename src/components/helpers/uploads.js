@@ -5,7 +5,7 @@ const getBase64 = (file, cb) => {
         cb(reader.result)
     };
     reader.onerror = function (error) {
-        console.log('Error: ', error);
+        return error
     };
 }
 

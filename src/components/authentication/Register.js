@@ -88,13 +88,11 @@ const Register = ({ registrationForm }) => {
     e.preventDefault();
     setLoading(!loading);
     await axios
-      .post(`${env.apiUrl}:${env.port}/api/users/signup`, formData)
+      .post(`${env.apiUrl}/users/signup`, formData)
       .then(({ data }) => {
-        console.log(data);
         setLoading(false);
       })
       .catch((err) => {
-        console.log(err);
         setLoading(false);
       });
   };

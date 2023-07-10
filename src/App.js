@@ -10,6 +10,7 @@ import '@fontsource/inter/700.css';
 import SingleBook from './components/books/SingleBook';
 import Auth from './pages/Auth';
 import Register from './components/authentication/Register';
+import CreateBook from './components/books/CreateBook';
 
 /**
  *
@@ -53,6 +54,7 @@ const App = () => {
             <Route path="/book/:slug" element={<SingleBook />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/book/create" element={<CreateBook />} />
           </Routes>
         </Container>
       </ThemeProvider>

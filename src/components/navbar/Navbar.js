@@ -14,6 +14,7 @@ import {
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import { cookies } from '../../constants';
+import { useCookies } from 'react-cookie';
 
 /**
  *
@@ -42,7 +43,8 @@ const navbar = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '1rem',
+    padding: '0 1rem',
+    margin: '1rem auto',
   },
 
   // LOGO
@@ -149,27 +151,35 @@ const pages = [
 ];
 
 const Navbar = () => {
-
   // DEFINE STATES
   const [loggedIn, setLoggedIn] = useState(false);
 
-    // GET USER AVATAR
-    let avatar = "https://res.cloudinary.com/nishimweprince/image/upload/v1683983573/bookstore/users/default_zqfkfp.png",
+  // HANDLE COOKIES
+  const [cookie, setCookie, removeCookie] = useCookies(['user']);
+
+  // GET USER AVATAR
+  let avatar =
+      'https://res.cloudinary.com/nishimweprince/image/upload/v1683983573/bookstore/users/default_zqfkfp.png',
     userCookie;
 
   const getCookie = () => {
     // CHECK IF USER IS LOGGED IN
-    userCookie = cookies.get('user');
-    if (userCookie) {
-      setLoggedIn(!loggedIn);
+    if (cookie.user) {
+      setLoggedIn(true);
+    } else {
+      setLoggedIn(false);
     }
   };
 
   useEffect(() => {
     getCookie();
-  }, [userCookie]);
+    if (cookie.user) {
+      userCookie = cookie.user
+      avatar = userCookie.photo;
+    }
+  }, [cookie]);
 
-  if(loggedIn) {
+  if (loggedIn) {
     const user = JSON.parse(localStorage.getItem('user'));
     avatar = user.photo;
   }
@@ -179,9 +189,13 @@ const Navbar = () => {
   return (
     <>
       <Container maxWidth={false} sx={navbar.container}>
-        <AppBar position="static" color='default' sx={navbar.appBar}>
+        <AppBar position="static" color="default" sx={navbar.appBar}>
           <Toolbar disableGutters sx={navbar.toolbarLeft}>
-            <Typography variant="a" onClick={() => navigate('/')} sx={navbar.logo}>
+            <Typography
+              variant="a"
+              onClick={() => navigate('/')}
+              sx={navbar.logo}
+            >
               Readr
             </Typography>
             <Box sx={navbar.box}>
@@ -208,6 +222,9 @@ const Navbar = () => {
             <Button
               endIcon={<FileUploadOutlinedIcon />}
               sx={navbar.uploadButton}
+              onClick={() => {
+                navigate('/book/create');
+              }}
             >
               Upload
             </Button>

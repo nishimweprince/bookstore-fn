@@ -10,8 +10,9 @@ import {
 import LoadingButton from '@mui/lab/LoadingButton';
 import React, { useState } from 'react';
 import axios from 'axios';
-import { env, cookies } from '../../constants';
+import { env } from '../../constants';
 import { useNavigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 
 /**
  * @description LOGIN COMPONENT CLASSES
@@ -75,9 +76,11 @@ const login = {
 };
 
 const Login = ({ loginForm }) => {
-
   // HANDLE NAVIGATION
   const navigate = useNavigate();
+
+  // HANDLE COOKIES
+  const [cookies, setCookie, removeCookie] = useCookies(['user']);
 
   // HANDLE LOADING STATE
   const [loading, setLoading] = useState(false);
@@ -99,126 +102,135 @@ const Login = ({ loginForm }) => {
     e.preventDefault();
     setLoading(true);
     await axios
-      .post(`${env.apiUrl}:${env.port}/api/users/login`, formData)
+      .post(`${env.apiUrl}/users/login`, formData)
       .then(({ data }) => {
-        console.log(data);
-        cookies.set('user', {
-          id: data.user.id,
-          token: data.Authorization,
-        }, { path: '/', maxAge: 604800 });
+        setCookie(
+          'user',
+          {
+            id: data.user.id,
+            token: data.Authorization,
+          },
+          { path: '/', maxAge: 604800 }
+        );
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('token', data.Authorization);
         setTimeout(() => {
-        navigate('/');
+          navigate('/');
         }, 2000);
         setLoading(false);
-        console.log(data);
       })
       .catch((err) => {
-        console.log(err);
         setLoading(false);
       });
   };
 
   return (
     <>
-        <Container sx={loginForm ? login.container : {
-          ...login.container, ...login.hideContainer
-        }}>
-          <Box sx={login.loginBox}>
-            {/* LOGIN HEADER */}
-            <Typography variant="h3" sx={login.loginHeader}>
-              Sign in using your Readr Account
-            </Typography>
-            {/* LOGIN INPUTS */}
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                width: '100%',
-              }}
-            >
-              <TextField
-                size="normal"
-                type="email"
-                name="email"
-                required
-                label="Email or Username"
-                variant="outlined"
-                sx={login.loginInputs}
-                onChange={handleFormData}
-              />
-              <TextField
-                size="normal"
-                type="password"
-                name="password"
-                required
-                label="Password"
-                variant="outlined"
-                sx={login.loginInputs}
-                onChange={handleFormData}
-              />
-            </Box>
-            <FormControlLabel
-              label="Remember me"
-              control={
-                <Checkbox
-                  sx={{
-                    fontSize: '1.6rem',
-                  }}
-                />
+      <Container
+        sx={
+          loginForm
+            ? login.container
+            : {
+                ...login.container,
+                ...login.hideContainer,
               }
-              sx={{
-                fontSize: '1.6rem',
-                textAlign: 'center',
-              }}
+        }
+      >
+        <Box sx={login.loginBox}>
+          {/* LOGIN HEADER */}
+          <Typography variant="h3" sx={login.loginHeader}>
+            Sign in using your Readr Account
+          </Typography>
+          {/* LOGIN INPUTS */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <TextField
+              size="normal"
+              type="email"
+              name="email"
+              required
+              label="Email or Username"
+              variant="outlined"
+              sx={login.loginInputs}
+              onChange={handleFormData}
             />
-            {/* LOGIN BUTTON */}
-            <Button
-              variant="contained"
-              disableElevation
-              disableRipple
-              sx={
-                !loading
-                  ? {
-                      width: '70%',
-                      margin: 'auto',
-                    }
-                  : {
-                      width: '70%',
-                      display: 'none',
-                    }
-              }
-              onClick={handleLogin}
-            >
-              Sign in
-            </Button>
-            <LoadingButton
-              variant="text"
-              color="primary"
-              loading={loading}
-              sx={
-                loading
-                  ? {
-                      margin: '1rem auto',
-                      fontWeight: '500',
-                      transition: 'all .2s ease-in-out',
-                    }
-                  : {
-                      margin: '0 auto',
-                      transition: 'all .2s ease-in-out',
-                    }
-              }
-            ></LoadingButton>
-            <Typography
-              variant="a"
-              color="primary"
-              sx={login.loginForgotPassword}
-            >
-              Forgot password?
-            </Typography>
+            <TextField
+              size="normal"
+              type="password"
+              name="password"
+              required
+              label="Password"
+              variant="outlined"
+              sx={login.loginInputs}
+              onChange={handleFormData}
+            />
           </Box>
-        </Container>
+          <FormControlLabel
+            label="Remember me"
+            control={
+              <Checkbox
+                sx={{
+                  fontSize: '1.6rem',
+                }}
+              />
+            }
+            sx={{
+              fontSize: '1.6rem',
+              textAlign: 'center',
+            }}
+          />
+          {/* LOGIN BUTTON */}
+          <Button
+            variant="contained"
+            disableElevation
+            disableRipple
+            sx={
+              !loading
+                ? {
+                    width: '70%',
+                    margin: 'auto',
+                  }
+                : {
+                    width: '70%',
+                    display: 'none',
+                  }
+            }
+            onClick={handleLogin}
+          >
+            Sign in
+          </Button>
+          <LoadingButton
+            variant="text"
+            color="primary"
+            loading={loading}
+            sx={
+              loading
+                ? {
+                    margin: '1rem auto',
+                    fontWeight: '500',
+                    transition: 'all .2s ease-in-out',
+                  }
+                : {
+                    margin: '0 auto',
+                    transition: 'all .2s ease-in-out',
+                  }
+            }
+          ></LoadingButton>
+          <Typography
+            variant="a"
+            color="primary"
+            sx={login.loginForgotPassword}
+          >
+            Forgot password?
+          </Typography>
+        </Box>
+      </Container>
     </>
   );
 };
